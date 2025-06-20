@@ -112,19 +112,19 @@ export default function TextToSpeechInput({
   const usagePercentage = usageInfo ? (usageInfo.used / usageInfo.max) * 100 : 0;
 
   return (
-    <div className="w-full bg-white py-16">
-      <div className="max-w-4xl mx-auto px-6">
+    <div className="w-full bg-white py-8 md:py-16">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6">
         {/* User Info and Authentication */}
         {isAuthenticated && user ? (
-          <div className="flex justify-between items-center mb-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
             <div>
               <h3 className="text-lg font-medium text-gray-900">Welcome, {user.email}</h3>
               <div className="mt-2">
-                <div className="flex items-center space-x-4">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4">
                   <span className="text-sm text-gray-600">
                     Usage: {usageInfo?.used || 0}/{usageInfo?.max || 3} generations
                   </span>
-                  <div className="w-32 h-2 bg-gray-200 rounded-full">
+                  <div className="w-24 sm:w-32 h-2 bg-gray-200 rounded-full">
                     <div 
                       className={`h-full rounded-full transition-all duration-300 ${
                         usagePercentage >= 100 ? 'bg-red-500' : 
@@ -151,7 +151,7 @@ export default function TextToSpeechInput({
           </div>
         ) : (
           <div className="text-center mb-8">
-            <div className="p-8 bg-gray-50 rounded-lg border border-gray-200">
+            <div className="p-4 sm:p-8 bg-gray-50 rounded-lg border border-gray-200">
               <h3 className="text-xl font-medium text-gray-900 mb-2">
                 🔒 Authentication Required
               </h3>
@@ -177,7 +177,7 @@ export default function TextToSpeechInput({
                 ? "Enter your text here to convert to speech..." 
                 : "Sign in to use text-to-speech functionality..."
             }
-            className="w-full min-h-[200px] p-6 border border-gray-300 rounded-lg resize-none focus:border-blue-500 focus:outline-none text-gray-800 text-lg leading-relaxed transition-colors duration-200"
+            className="w-full min-h-[200px] p-4 sm:p-6 border border-gray-300 rounded-lg resize-none focus:border-blue-500 focus:outline-none text-gray-800 text-base sm:text-lg leading-relaxed transition-colors duration-200"
             maxLength={maxLength}
             disabled={!isAuthenticated || (usageInfo && remainingUses === 0)}
           />
@@ -187,9 +187,9 @@ export default function TextToSpeechInput({
         </div>
         
         {/* Generate Button */}
-        <div className="mt-8 flex justify-center">
+        <div className="mt-6 sm:mt-8 flex justify-center">
           <button
-            className={`px-95 py-3 text-lg font-medium text-white border-2 border-gray-300 rounded-lg transition-colors duration-300 ease-in-out ${
+            className={`w-full sm:w-auto px-6 sm:px-95 py-2 sm:py-3 text-base sm:text-lg font-medium text-white border-2 border-gray-300 rounded-lg transition-colors duration-300 ease-in-out ${
               !isAuthenticated ? 'bg-gray-400 cursor-not-allowed' :
               remainingUses === 0 ? 'bg-gray-400 cursor-not-allowed' : ''
             }`}

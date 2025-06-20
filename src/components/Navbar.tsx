@@ -13,7 +13,7 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white border-b border-gray-200">
-      <div className="flex items-center px-32 py-4">
+      <div className="flex items-center px-4 sm:px-8 md:px-16 lg:px-32 py-4">
         {/* Logo - Left aligned */}
         <div className="flex-shrink-0">
           <Link href="/" className="flex items-center">
@@ -90,13 +90,13 @@ export default function Navbar() {
       </div>
 
       {/* Mobile menu */}
-      <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden border-t border-black`}>
-        <div className="px-4 pt-2 pb-3 space-y-1">
+      <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden border-t border-gray-200`}>
+        <div className="px-4 pt-2 pb-3 space-y-1 bg-white shadow-lg">
           {navItems.map((item) => (
             <Link
               key={item.href}
               href={item.href}
-              className="nav-link relative text-gray-800 block px-6 py-2 text-base font-bold uppercase tracking-wide"
+              className="nav-link block relative text-gray-800 px-4 py-3 text-base font-bold uppercase tracking-wide"
               onClick={() => setIsMenuOpen(false)}
             >
               <span className="inline-block transition-transform duration-300 ease-[cubic-bezier(0.4,1,0.8,1)]">

@@ -96,21 +96,21 @@ export default function PricingPage() {
 
   return (
     <div>
-      <div className="h-[16rem] w-full bg-white flex flex-col items-center justify-center relative pt-10 ">
-        <h1 className="text-7xl font-bold text-center text-gray-900 relative z-20">
+      <div className="h-auto sm:h-[16rem] w-full bg-white flex flex-col items-center justify-center relative py-8 sm:pt-10">
+        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-center text-gray-900 relative z-20 px-4">
           Simple Pricing for Powerful Voices
         </h1>
       </div>
       
       {/* Subheading */}
-      <div className="text-center ">
-        <p className="text-3xl text-gray-700 max-w-5xl mx-auto leading-tight">
+      <div className="text-center px-4">
+        <p className="text-xl sm:text-2xl md:text-3xl text-gray-700 max-w-5xl mx-auto leading-tight">
           Whether you're a content creator, a startup, or an enterprise giant — we have a plan that speaks your language.
         </p>
       </div>
 
       {/* Pricing Cards */}
-      <div className="max-w-7xl mx-auto px-6 py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-16">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {pricingPlans.map((plan, index) => (
             <PricingCard

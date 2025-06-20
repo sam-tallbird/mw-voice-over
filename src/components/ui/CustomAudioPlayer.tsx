@@ -102,10 +102,10 @@ export default function CustomAudioPlayer({ src, className = '' }: CustomAudioPl
   };
 
   return (
-    <div className={`bg-gray-50 p-4 rounded-lg w-full ${className}`}>
+    <div className={`bg-gray-50 p-3 sm:p-4 rounded-lg w-full ${className}`}>
       <audio ref={audioRef} src={src} preload="metadata" />
       
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3">
         <button 
           onClick={togglePlay}
           className="flex-shrink-0 w-8 h-8 flex items-center justify-center"
@@ -121,9 +121,9 @@ export default function CustomAudioPlayer({ src, className = '' }: CustomAudioPl
           )}
         </button>
         
-        <span className="text-xs text-gray-600 w-8">{formatTime(currentTime)}</span>
+        <span className="text-xs text-gray-600 w-7 sm:w-8">{formatTime(currentTime)}</span>
         
-        <div className="flex-1 relative">
+        <div className="flex-1 relative order-last sm:order-none w-full sm:w-auto mt-2 sm:mt-0">
           {/* Custom progress bar */}
           <div 
             ref={progressRef}
@@ -141,7 +141,7 @@ export default function CustomAudioPlayer({ src, className = '' }: CustomAudioPl
             
             {/* Thumb/dot */}
             <div 
-              className="absolute top-1/2 h-4 w-4 rounded-full border-2 border-white shadow-sm transform -translate-y-1/2"
+              className="absolute top-1/2 h-3 w-3 sm:h-4 sm:w-4 rounded-full border-2 border-white shadow-sm transform -translate-y-1/2"
               style={{ 
                 left: getThumbPosition(),
                 backgroundColor: '#1DB6FD' // Blue color matching the hover state
@@ -162,7 +162,7 @@ export default function CustomAudioPlayer({ src, className = '' }: CustomAudioPl
           />
         </div>
         
-        <span className="text-xs text-gray-600 w-8">{formatTime(duration)}</span>
+        <span className="text-xs text-gray-600 w-7 sm:w-8">{formatTime(duration)}</span>
         
         <div className="relative">
           <button 
