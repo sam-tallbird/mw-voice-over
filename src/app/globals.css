@@ -71,3 +71,64 @@ body {
 .animate-star-movement-top {
   animation: star-movement-top linear infinite alternate;
 }
+
+/* Hide download button in audio players */
+audio::-internal-media-controls-download-button {
+  display: none !important;
+}
+
+audio::-webkit-media-controls-enclosure {
+  overflow: hidden !important;
+}
+
+audio::-webkit-media-controls-panel {
+  width: calc(100% + 30px);
+}
+
+/* Custom styles for range inputs (sliders) */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  outline: none;
+}
+
+/* Thumb styles */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+  border: 2px solid white;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Make sure the track is full width */
+input[type="range"]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  border-radius: 3px;
+}
+
+input[type="range"]::-moz-range-track {
+  width: 100%;
+  height: 6px;
+  cursor: pointer;
+  border-radius: 3px;
+}

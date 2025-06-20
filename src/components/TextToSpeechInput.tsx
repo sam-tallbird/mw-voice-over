@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from "react";
+import CustomAudioPlayer from "./ui/CustomAudioPlayer";
 
 interface TextToSpeechInputProps {
   user?: any;
@@ -217,7 +218,9 @@ export default function TextToSpeechInput({
         
         {audioUrl && (
           <div className="mt-6 flex justify-center">
-            <audio controls src={audioUrl} className="w-full max-w-md" />
+            <div className="w-full" style={{ maxWidth: "450px" }}>
+              <CustomAudioPlayer src={audioUrl} />
+            </div>
           </div>
         )}
       </div>
