@@ -3,6 +3,24 @@
 import { useState, useEffect } from "react";
 import CustomAudioPlayer from "./ui/CustomAudioPlayer";
 
+interface Voice {
+  name: string;
+  characteristics: string;
+  gender: 'male' | 'female';
+}
+
+const AVAILABLE_VOICES: Voice[] = [
+  { name: 'Puck', characteristics: 'Upbeat', gender: 'male' },
+  { name: 'Kore', characteristics: 'Firm', gender: 'female' },
+  { name: 'Fenrir', characteristics: 'Excitable', gender: 'male' },
+  { name: 'Leda', characteristics: 'Youthful', gender: 'female' },
+  { name: 'Orus', characteristics: 'Firm', gender: 'male' },
+  { name: 'Aoede', characteristics: 'Breezy', gender: 'female' },
+  { name: 'Callirrhoe', characteristics: 'Easy-going', gender: 'female' },
+  { name: 'Enceladus', characteristics: 'Breathy', gender: 'male' },
+  { name: 'Sadachbia', characteristics: 'Lively', gender: 'female' }
+];
+
 interface TextToSpeechInputProps {
   user?: any;
   token?: string;
@@ -19,6 +37,7 @@ export default function TextToSpeechInput({
   isAuthenticated 
 }: TextToSpeechInputProps) {
   const [inputText, setInputText] = useState("");
+  const [selectedVoice, setSelectedVoice] = useState<string>('Orus');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [usageInfo, setUsageInfo] = useState(user?.usage || { used: 0, max: 3 });
@@ -41,6 +60,15 @@ export default function TextToSpeechInput({
     }
   };
 
+  const handleVoiceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedVoice(e.target.value);
+  };
+
+  const getVoiceGender = (voiceName: string): 'male' | 'female' => {
+    const voice = AVAILABLE_VOICES.find(v => v.name === voiceName);
+    return voice?.gender || 'male';
+  };
+
   const handleGenerate = async () => {
     if (!inputText.trim() || !isAuthenticated || !token) return;
     
@@ -60,7 +88,8 @@ export default function TextToSpeechInput({
         },
         body: JSON.stringify({ 
           text: inputText.trim(),
-          email: user?.email
+          email: user?.email,
+          voiceName: selectedVoice
         }),
       });
 
@@ -164,6 +193,54 @@ export default function TextToSpeechInput({
               >
                 Sign In
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* Voice Selection Dropdown */}
+        {isAuthenticated && (
+          <div className="mb-6">
+            <label htmlFor="voice-select" className="block text-sm font-medium text-gray-700 mb-2">
+              Select Voice
+            </label>
+            <div className="relative">
+              <select
+                id="voice-select"
+                value={selectedVoice}
+                onChange={handleVoiceChange}
+                className={`w-full p-3 pr-12 border rounded-lg focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-all duration-200 appearance-none ${
+                  getVoiceGender(selectedVoice) === 'male'
+                    ? 'border-blue-300 focus:border-blue-500 focus:ring-blue-500 bg-blue-50'
+                    : 'border-pink-300 focus:border-pink-500 focus:ring-pink-500 bg-pink-50'
+                }`}
+                style={{
+                  backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
+                  backgroundPosition: 'right 0.75rem center',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: '1.5em 1.5em'
+                }}
+                disabled={!isAuthenticated || (usageInfo && remainingUses === 0)}
+              >
+                {AVAILABLE_VOICES.map((voice) => (
+                  <option 
+                    key={voice.name} 
+                    value={voice.name}
+                    className={voice.gender === 'male' ? 'text-blue-700' : 'text-pink-700'}
+                  >
+                    {voice.name} - {voice.characteristics} ({voice.gender === 'male' ? '♂' : '♀'})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="mt-2 flex items-center gap-4 text-xs text-gray-600">
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>Male voices</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-pink-500 rounded-full"></div>
+                <span>Female voices</span>
+              </div>
             </div>
           </div>
         )}

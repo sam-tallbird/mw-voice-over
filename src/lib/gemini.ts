@@ -3,7 +3,7 @@
 import { GoogleGenAI } from "@google/genai";
 import mime from 'mime';
 
-export async function generateSpeech(text: string): Promise<Uint8Array> {
+export async function generateSpeech(text: string, voiceName: string = 'Orus'): Promise<Uint8Array> {
   if (!process.env.GEMINI_API_KEY) {
     throw new Error("GEMINI_API_KEY env var is missing");
   }
@@ -21,7 +21,7 @@ export async function generateSpeech(text: string): Promise<Uint8Array> {
     speechConfig: {
       voiceConfig: {
         prebuiltVoiceConfig: {
-          voiceName: 'Orus',
+          voiceName: voiceName,
         }
       }
     },
@@ -45,6 +45,7 @@ export async function generateSpeech(text: string): Promise<Uint8Array> {
   console.log('Config:', JSON.stringify(config, null, 2));
   console.log('Contents:', JSON.stringify(contents, null, 2));
   console.log('Model:', model);
+  console.log('Selected Voice:', voiceName);
 
   try {
     // Use the exact method call from your original code

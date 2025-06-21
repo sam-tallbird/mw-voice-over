@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 export async function POST(req: Request) {
   try {
     const supabase = createServerSupabaseClient();
-    const { text, email } = await req.json();
+    const { text, email, voiceName } = await req.json();
 
     if (typeof text !== 'string' || text.trim().length === 0) {
       return NextResponse.json({ error: 'Text is required' }, { status: 400 });
@@ -41,8 +41,8 @@ export async function POST(req: Request) {
       }, { status: 403 });
     }
 
-    // Generate speech
-    const audioBuffer = await generateSpeech(text.trim());
+    // Generate speech with selected voice (default to 'Orus' if not provided)
+    const audioBuffer = await generateSpeech(text.trim(), voiceName || 'Orus');
     
     // Update usage count
     const { error: updateError } = await supabase
