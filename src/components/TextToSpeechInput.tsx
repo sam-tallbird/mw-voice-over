@@ -87,7 +87,7 @@ export default function TextToSpeechInput({
           "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({ 
-          text: inputText.trim(),
+          text: `Read aloud in a warm and friendly iraqi tone: ${inputText.trim()}`,
           email: user?.email,
           voiceName: selectedVoice
         }),
