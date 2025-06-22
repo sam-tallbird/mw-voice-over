@@ -74,7 +74,7 @@ export default function Home() {
           showBorder={false}
           className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-center whitespace-normal md:whitespace-nowrap relative z-20 px-4 md:px-0"
         >
-          IRAQI FIRST TEXT TO SPEACH
+          FIRST IRAQI TEXT TO SPEECH
         </GradientText>
         <div className="w-full md:w-[90%] lg:w-[100rem] h-40 relative">
           {/* Gradients */}
