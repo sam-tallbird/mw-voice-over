@@ -4,21 +4,23 @@ import { useState, useEffect } from "react";
 import CustomAudioPlayer from "./ui/CustomAudioPlayer";
 
 interface Voice {
-  name: string;
+  googleApiName: string; // Name sent to Google API
+  displayName: string;   // Name shown in UI
+  arabicName: string;    // Arabic name
   characteristics: string;
   gender: 'male' | 'female';
 }
 
 const AVAILABLE_VOICES: Voice[] = [
-  { name: 'Puck', characteristics: 'Upbeat', gender: 'male' },
-  { name: 'Kore', characteristics: 'Firm', gender: 'female' },
-  { name: 'Fenrir', characteristics: 'Excitable', gender: 'male' },
-  { name: 'Leda', characteristics: 'Youthful', gender: 'female' },
-  { name: 'Orus', characteristics: 'Firm', gender: 'male' },
-  { name: 'Aoede', characteristics: 'Breezy', gender: 'female' },
-  { name: 'Callirrhoe', characteristics: 'Easy-going', gender: 'female' },
-  { name: 'Enceladus', characteristics: 'Breathy', gender: 'male' },
-  { name: 'Sadachbia', characteristics: 'Lively', gender: 'female' }
+  { googleApiName: 'Puck', displayName: 'Bashar', arabicName: 'بشار', characteristics: 'Upbeat', gender: 'male' },
+  { googleApiName: 'Kore', displayName: 'Razan', arabicName: 'رزان', characteristics: 'Firm', gender: 'female' },
+  { googleApiName: 'Fenrir', displayName: 'Firas', arabicName: 'فراس', characteristics: 'Excitable', gender: 'male' },
+  { googleApiName: 'Leda', displayName: 'Zahra', arabicName: 'زهراء', characteristics: 'Youthful', gender: 'female' },
+  { googleApiName: 'Orus', displayName: 'Qays', arabicName: 'قيس', characteristics: 'Firm', gender: 'male' },
+  { googleApiName: 'Aoede', displayName: 'Sama', arabicName: 'سما', characteristics: 'Breezy', gender: 'female' },
+  { googleApiName: 'Callirrhoe', displayName: 'Rowaida', arabicName: 'رويدا', characteristics: 'Easy-going', gender: 'female' },
+  { googleApiName: 'Enceladus', displayName: 'Naseem', arabicName: 'نسيم', characteristics: 'Breathy', gender: 'male' },
+  { googleApiName: 'Sadachbia', displayName: 'Marah', arabicName: 'مرح', characteristics: 'Lively', gender: 'female' }
 ];
 
 interface TextToSpeechInputProps {
@@ -37,7 +39,7 @@ export default function TextToSpeechInput({
   isAuthenticated 
 }: TextToSpeechInputProps) {
   const [inputText, setInputText] = useState("");
-  const [selectedVoice, setSelectedVoice] = useState<string>('Orus');
+  const [selectedVoice, setSelectedVoice] = useState<string>('Orus'); // Default to Qays (Google API: Orus)
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [usageInfo, setUsageInfo] = useState(user?.usage || { used: 0, max: 3 });
@@ -65,8 +67,13 @@ export default function TextToSpeechInput({
   };
 
   const getVoiceGender = (voiceName: string): 'male' | 'female' => {
-    const voice = AVAILABLE_VOICES.find(v => v.name === voiceName);
+    const voice = AVAILABLE_VOICES.find(v => v.googleApiName === voiceName);
     return voice?.gender || 'male';
+  };
+
+  const getVoiceDisplayName = (voiceName: string): string => {
+    const voice = AVAILABLE_VOICES.find(v => v.googleApiName === voiceName);
+    return voice?.displayName || voiceName;
   };
 
   const handleGenerate = async () => {
@@ -223,12 +230,12 @@ export default function TextToSpeechInput({
               >
                 {AVAILABLE_VOICES.map((voice) => (
                   <option 
-                    key={voice.name} 
-                    value={voice.name}
+                    key={voice.googleApiName} 
+                    value={voice.googleApiName}
                     className={voice.gender === 'male' ? 'text-blue-700' : 'text-pink-700'}
-                  >
-                    {voice.name} - {voice.characteristics} ({voice.gender === 'male' ? '♂' : '♀'})
-                  </option>
+                                      >
+                      {voice.displayName} ({voice.arabicName}) - {voice.characteristics} ({voice.gender === 'male' ? '♂' : '♀'})
+                    </option>
                 ))}
               </select>
             </div>
