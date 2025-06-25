@@ -303,7 +303,7 @@ export default function TextToSpeechInput({
         {audioUrl && (
           <div className="mt-6 flex justify-center">
             <div className="w-full" style={{ maxWidth: "450px" }}>
-              <CustomAudioPlayer src={audioUrl} />
+              <CustomAudioPlayer src={audioUrl} user={user} />
             </div>
           </div>
         )}

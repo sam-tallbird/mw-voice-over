@@ -13,7 +13,6 @@ export default function LoginModal({ isOpen, onLogin, onClose }: LoginModalProps
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [showCredentials, setShowCredentials] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,19 +47,6 @@ export default function LoginModal({ isOpen, onLogin, onClose }: LoginModalProps
     }
   };
 
-  const demoCredentials = [
-    { email: 'demo1@mw.com', password: 'A7k$9mX2nP4qW8vZ' },
-    { email: 'demo2@mw.com', password: 'B9p#5rY7sL3uE6tR' },
-    { email: 'demo3@mw.com', password: 'C4w@8nM1oQ9kI2xV' },
-    { email: 'demo4@mw.com', password: 'D6z%3fH5gJ7bN0cF' },
-    { email: 'demo5@mw.com', password: 'E8t!1dA4hK6yU9sG' }
-  ];
-
-  const fillDemo = (creds: { email: string; password: string }) => {
-    setEmail(creds.email);
-    setPassword(creds.password);
-  };
-
   if (!isOpen) return null;
 
   return (
@@ -89,7 +75,7 @@ export default function LoginModal({ isOpen, onLogin, onClose }: LoginModalProps
               Sign in to MoonWhale Voice-Over
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              Demo access with limited usage
+              Access your voice generation account
             </p>
           </div>
 
@@ -107,7 +93,7 @@ export default function LoginModal({ isOpen, onLogin, onClose }: LoginModalProps
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                placeholder="demo1@mw.com"
+                placeholder="Enter your email"
               />
             </div>
 
@@ -124,7 +110,7 @@ export default function LoginModal({ isOpen, onLogin, onClose }: LoginModalProps
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-purple-500 focus:border-purple-500"
-                placeholder="16-character password"
+                placeholder="Enter your password"
               />
             </div>
 
@@ -142,37 +128,6 @@ export default function LoginModal({ isOpen, onLogin, onClose }: LoginModalProps
               {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </form>
-
-          <div className="mt-4">
-            <button
-              onClick={() => setShowCredentials(!showCredentials)}
-              className="text-sm text-purple-600 hover:text-purple-500 underline"
-            >
-              {showCredentials ? 'Hide' : 'Show'} Demo Credentials
-            </button>
-
-            {showCredentials && (
-              <div className="mt-3 p-3 bg-gray-50 rounded-lg max-h-48 overflow-y-auto">
-                <h3 className="text-sm font-medium text-gray-900 mb-2">Demo Accounts (3 uses each):</h3>
-                <div className="space-y-2">
-                  {demoCredentials.map((creds, index) => (
-                    <div key={index} className="flex items-center justify-between text-xs">
-                      <div className="text-gray-700 flex-1 mr-2">
-                        <div className="font-medium">{creds.email}</div>
-                        <div className="font-mono text-xs break-all">{creds.password}</div>
-                      </div>
-                      <button
-                        onClick={() => fillDemo(creds)}
-                        className="px-2 py-1 text-xs bg-purple-100 text-purple-700 rounded hover:bg-purple-200 flex-shrink-0"
-                      >
-                        Use
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </div>

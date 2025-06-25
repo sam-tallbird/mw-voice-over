@@ -5,9 +5,10 @@ import { useState, useRef, useEffect } from 'react';
 interface CustomAudioPlayerProps {
   src: string;
   className?: string;
+  user?: any; // User object to check for download permissions
 }
 
-export default function CustomAudioPlayer({ src, className = '' }: CustomAudioPlayerProps) {
+export default function CustomAudioPlayer({ src, className = '', user }: CustomAudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -18,6 +19,9 @@ export default function CustomAudioPlayer({ src, className = '' }: CustomAudioPl
 
   const playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
+  // Check if the current user has download permission
+  const canDownload = user?.email === 'demo1@mw.com'; // Only demo1 user can download
+  
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -99,6 +103,17 @@ export default function CustomAudioPlayer({ src, className = '' }: CustomAudioPl
     if (progressPercentage <= 0) return '0%';
     if (progressPercentage >= 100) return 'calc(100% - 8px)';
     return `calc(${progressPercentage}% - 4px)`;
+  };
+
+  const handleDownload = () => {
+    if (!canDownload) return;
+    
+    const link = document.createElement('a');
+    link.href = src;
+    link.download = `voice-over-${new Date().getTime()}.wav`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -189,6 +204,20 @@ export default function CustomAudioPlayer({ src, className = '' }: CustomAudioPl
             </div>
           )}
         </div>
+        
+        {/* Download Button - Only visible for authorized user */}
+        {canDownload && (
+          <button 
+            onClick={handleDownload}
+            className="flex-shrink-0 w-8 h-8 flex items-center justify-center text-xs px-2 py-1 bg-green-100 border border-green-300 rounded hover:bg-green-200 transition-colors"
+            title="Download Audio"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#059669" viewBox="0 0 16 16">
+              <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
+              <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   );
