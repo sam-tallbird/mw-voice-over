@@ -7,7 +7,7 @@ export const runtime = 'nodejs';
 export async function POST(req: Request) {
   try {
     const supabase = createServerSupabaseClient();
-    const { text, email, voiceName } = await req.json();
+    const { text, email, voiceName, temperature } = await req.json();
 
     if (typeof text !== 'string' || text.trim().length === 0) {
       return NextResponse.json({ error: 'Text is required' }, { status: 400 });
@@ -41,8 +41,11 @@ export async function POST(req: Request) {
       }, { status: 403 });
     }
 
-    // Generate speech with selected voice (default to 'Orus' if not provided)
-    const audioBuffer = await generateSpeech(text.trim(), voiceName || 'Orus');
+    // Determine temperature based on user (demo1 gets custom, others get 1)
+    const userTemperature = user.email === 'demo1@mw.com' ? (temperature ?? 0) : 1;
+    
+    // Generate speech with selected voice and temperature
+    const audioBuffer = await generateSpeech(text.trim(), voiceName || 'Orus', userTemperature);
     
     // Update usage count
     const { error: updateError } = await supabase
@@ -54,7 +57,7 @@ export async function POST(req: Request) {
       .eq('id', user.id);
     
     if (updateError) {
-      console.error('Failed to update usage:', updateError);
+      // Silent error - usage update failed but audio was generated
     }
     
     // Get updated user data
@@ -72,7 +75,6 @@ export async function POST(req: Request) {
       },
     });
   } catch (err: Error | unknown) {
-    console.error('TTS route error', err);
     const message = process.env.NODE_ENV === 'production' 
       ? 'Internal Server Error' 
       : err instanceof Error ? err.message : 'Unknown error';

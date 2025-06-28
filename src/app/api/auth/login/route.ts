@@ -10,7 +10,20 @@ const JWT_SECRET = 'moonwhale-demo-secret-key-2024';
 
 export async function POST(req: Request) {
   try {
-    const { email, password } = await req.json();
+    // Parse request body safely
+    let email: string;
+    let password: string;
+    
+    try {
+      const body = await req.json();
+      email = body.email;
+      password = body.password;
+    } catch (parseError) {
+      return NextResponse.json(
+        { error: 'Invalid JSON in request body' },
+        { status: 400 }
+      );
+    }
 
     if (!email || !password) {
       return NextResponse.json(
@@ -19,8 +32,17 @@ export async function POST(req: Request) {
       );
     }
 
-    // Validate user credentials
-    const user = validateUser(email, password);
+    // Validate user credentials with error handling
+    let user;
+    try {
+      user = validateUser(email, password);
+    } catch (validateError) {
+      return NextResponse.json(
+        { error: 'Error validating user credentials' },
+        { status: 500 }
+      );
+    }
+
     if (!user) {
       return NextResponse.json(
         { error: 'Invalid email or password' },
@@ -28,16 +50,21 @@ export async function POST(req: Request) {
       );
     }
 
-    // Get latest usage data from Supabase
-    const supabase = createServerSupabaseClient();
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('current_usage, max_usage')
-      .eq('email', email)
-      .single();
+    // Get latest usage data from Supabase with error handling
+    let userData = null;
+    try {
+      const supabase = createServerSupabaseClient();
+      const { data, error: userError } = await supabase
+        .from('users')
+        .select('current_usage, max_usage')
+        .eq('email', email)
+        .single();
 
-    if (userError) {
-      console.error('Error fetching user data from Supabase:', userError);
+      if (!userError) {
+        userData = data;
+      }
+    } catch (supabaseError) {
+      // Continue without Supabase data if there's an error
     }
 
     // Use Supabase data if available, otherwise fall back to local data
@@ -46,14 +73,22 @@ export async function POST(req: Request) {
       : { used: 0, max: 3 };
 
     // Create JWT token
-    const token = sign(
-      { 
-        userId: user.id, 
-        email: user.email 
-      },
-      JWT_SECRET,
-      { expiresIn: '24h' }
-    );
+    let token;
+    try {
+      token = sign(
+        { 
+          userId: user.id, 
+          email: user.email 
+        },
+        JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+    } catch (jwtError) {
+      return NextResponse.json(
+        { error: 'Error creating authentication token' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,
@@ -66,9 +101,10 @@ export async function POST(req: Request) {
     });
 
   } catch (err: Error | unknown) {
-    console.error('Login error:', err);
+    // Catch any other unexpected errors
+    const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred';
     return NextResponse.json(
-      { error: 'Internal server error' },
+      { error: `Login failed: ${errorMessage}` },
       { status: 500 }
     );
   }

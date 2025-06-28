@@ -12,15 +12,16 @@ interface Voice {
 }
 
 const AVAILABLE_VOICES: Voice[] = [
-  { googleApiName: 'Puck', displayName: 'Bashar', arabicName: 'بشار', characteristics: 'Upbeat', gender: 'male' },
-  { googleApiName: 'Kore', displayName: 'Razan', arabicName: 'رزان', characteristics: 'Firm', gender: 'female' },
-  { googleApiName: 'Fenrir', displayName: 'Firas', arabicName: 'فراس', characteristics: 'Excitable', gender: 'male' },
-  { googleApiName: 'Leda', displayName: 'Zahra', arabicName: 'زهراء', characteristics: 'Youthful', gender: 'female' },
-  { googleApiName: 'Orus', displayName: 'Qays', arabicName: 'قيس', characteristics: 'Firm', gender: 'male' },
-  { googleApiName: 'Aoede', displayName: 'Sama', arabicName: 'سما', characteristics: 'Breezy', gender: 'female' },
-  { googleApiName: 'Callirrhoe', displayName: 'Rowaida', arabicName: 'رويدا', characteristics: 'Easy-going', gender: 'female' },
-  { googleApiName: 'Enceladus', displayName: 'Naseem', arabicName: 'نسيم', characteristics: 'Breathy', gender: 'male' },
-  { googleApiName: 'Sadachbia', displayName: 'Marah', arabicName: 'مرح', characteristics: 'Lively', gender: 'female' }
+  { googleApiName: 'puck', displayName: 'Bashar', arabicName: 'بشار', characteristics: 'Upbeat', gender: 'male' },
+  { googleApiName: 'kore', displayName: 'Razan', arabicName: 'رزان', characteristics: 'Firm', gender: 'female' },
+  { googleApiName: 'fenrir', displayName: 'Firas', arabicName: 'فراس', characteristics: 'Excitable', gender: 'male' },
+  { googleApiName: 'leda', displayName: 'Zahra', arabicName: 'زهراء', characteristics: 'Youthful', gender: 'female' },
+  { googleApiName: 'orus', displayName: 'Qays', arabicName: 'قيس', characteristics: 'Firm', gender: 'male' },
+  { googleApiName: 'aoede', displayName: 'Sama', arabicName: 'سما', characteristics: 'Breezy', gender: 'female' },
+  { googleApiName: 'callirrhoe', displayName: 'Rowaida', arabicName: 'رويدا', characteristics: 'Easy-going', gender: 'female' },
+  { googleApiName: 'enceladus', displayName: 'Naseem', arabicName: 'نسيم', characteristics: 'Breathy', gender: 'male' },
+  { googleApiName: 'sadachbia', displayName: 'Marah', arabicName: 'مرح', characteristics: 'Lively', gender: 'female' },
+  { googleApiName: 'zephyr', displayName: 'Sarah', arabicName: 'سارة', characteristics: 'Gentle', gender: 'female' }
 ];
 
 interface TextToSpeechInputProps {
@@ -39,11 +40,15 @@ export default function TextToSpeechInput({
   isAuthenticated 
 }: TextToSpeechInputProps) {
   const [inputText, setInputText] = useState("");
-  const [selectedVoice, setSelectedVoice] = useState<string>('Orus'); // Default to Qays (Google API: Orus)
+  const [selectedVoice, setSelectedVoice] = useState<string>('orus'); // Default to Qays (Google API: orus)
+  const [temperature, setTemperature] = useState<number>(0); // Temperature control
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [usageInfo, setUsageInfo] = useState(user?.usage || { used: 0, max: 3 });
   const maxLength = 1000;
+
+  // Check if current user has temperature control access
+  const hasTemperatureControl = user?.email === 'demo1@mw.com';
 
   useEffect(() => {
     if (user?.usage) {
@@ -64,6 +69,11 @@ export default function TextToSpeechInput({
 
   const handleVoiceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedVoice(e.target.value);
+  };
+
+  const handleTemperatureChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newTemp = parseFloat(e.target.value);
+    setTemperature(newTemp);
   };
 
   const getVoiceGender = (voiceName: string): 'male' | 'female' => {
@@ -87,6 +97,8 @@ export default function TextToSpeechInput({
 
     try {
       setLoading(true);
+      const requestTemperature = hasTemperatureControl ? temperature : 1;
+      
       const res = await fetch("/api/tts", {
         method: "POST",
         headers: { 
@@ -94,9 +106,10 @@ export default function TextToSpeechInput({
           "Authorization": `Bearer ${token}`
         },
         body: JSON.stringify({ 
-          text: `Read aloud in a warm and friendly iraqi tone: ${inputText.trim()}`,
+          text: `Speak clearly in authentic Iraqi Arabic dialect (لهجة عراقية) with consistent neutral delivery: ${inputText.trim()}`,
           email: user?.email,
-          voiceName: selectedVoice
+          voiceName: selectedVoice,
+          temperature: requestTemperature
         }),
       });
 
@@ -233,9 +246,9 @@ export default function TextToSpeechInput({
                     key={voice.googleApiName} 
                     value={voice.googleApiName}
                     className={voice.gender === 'male' ? 'text-blue-700' : 'text-pink-700'}
-                                      >
+                  >
                       {voice.displayName} ({voice.arabicName}) - {voice.characteristics} ({voice.gender === 'male' ? '♂' : '♀'})
-                    </option>
+                  </option>
                 ))}
               </select>
             </div>
@@ -247,6 +260,68 @@ export default function TextToSpeechInput({
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-pink-500 rounded-full"></div>
                 <span>Female voices</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Temperature Control - Only for demo1 user */}
+        {isAuthenticated && hasTemperatureControl && (
+          <div className="mb-6">
+            <label htmlFor="temperature-control" className="block text-sm font-medium text-gray-700 mb-2">
+              Temperature Control (Advanced)
+            </label>
+            <div className="relative">
+              {/* Custom progress bar like audio player */}
+              <div className="h-1.5 bg-gray-300 rounded-full cursor-pointer relative">
+                {/* Progress fill */}
+                <div 
+                  className="absolute top-0 left-0 h-full rounded-full"
+                  style={{ 
+                    width: `${(temperature / 2) * 100}%`,
+                    backgroundColor: '#660AF0' // Purple color matching the Generate button
+                  }}
+                ></div>
+                
+                {/* Thumb/dot */}
+                <div 
+                  className="absolute top-1/2 h-3 w-3 sm:h-4 sm:w-4 rounded-full border-2 border-white shadow-sm transform -translate-y-1/2"
+                  style={{ 
+                    left: (() => {
+                      const percentage = (temperature / 2) * 100;
+                      if (percentage <= 0) return '0%';
+                      if (percentage >= 100) return 'calc(100% - 8px)';
+                      return `calc(${percentage}% - 4px)`;
+                    })(),
+                    backgroundColor: '#1DB6FD' // Blue color matching the hover state
+                  }}
+                ></div>
+              </div>
+              
+              {/* Hidden range input for accessibility */}
+              <input
+                id="temperature-control"
+                type="range"
+                min="0"
+                max="2"
+                step="0.1"
+                value={temperature}
+                onChange={handleTemperatureChange}
+                className="absolute inset-0 w-full opacity-0 cursor-pointer"
+                aria-label="Temperature Control"
+                disabled={!isAuthenticated || (usageInfo && remainingUses === 0)}
+              />
+              
+              <div className="flex justify-between text-xs text-gray-500 mt-1">
+                <span>0 (Consistent)</span>
+                <span className="font-medium text-blue-600">Current: {temperature}</span>
+                <span>2 (Creative)</span>
+              </div>
+            </div>
+            <div className="mt-2 text-xs text-gray-600">
+              <div className="flex items-center gap-1">
+                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                <span>Higher values = more variation, Lower values = more consistency</span>
               </div>
             </div>
           </div>

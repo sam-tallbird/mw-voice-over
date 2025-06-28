@@ -3,7 +3,7 @@
 import { GoogleGenAI } from "@google/genai";
 import mime from 'mime';
 
-export async function generateSpeech(text: string, voiceName: string = 'Orus'): Promise<Uint8Array> {
+export async function generateSpeech(text: string, voiceName: string = 'orus', temperature: number = 1): Promise<Uint8Array> {
   if (!process.env.GEMINI_API_KEY) {
     throw new Error("GEMINI_API_KEY env var is missing");
   }
@@ -12,103 +12,68 @@ export async function generateSpeech(text: string, voiceName: string = 'Orus'): 
     apiKey: process.env.GEMINI_API_KEY,
   });
 
-  // Try the exact config format from your original code
-  const config = {
-    temperature: 1,
-    responseModalities: [
-      'audio',
-    ],
-    speechConfig: {
-      voiceConfig: {
-        prebuiltVoiceConfig: {
-          voiceName: voiceName,
-        }
-      }
-    },
-  };
-
   const model = 'gemini-2.5-pro-preview-tts';
-  
-  // Try the exact contents format from your original code
-  const contents = [
-    {
-      role: 'user',
-      parts: [
-        {
-          text: text,
-        },
-      ],
-    },
-  ];
-
-  console.log('Starting TTS generation...');
-  console.log('Config:', JSON.stringify(config, null, 2));
-  console.log('Contents:', JSON.stringify(contents, null, 2));
-  console.log('Model:', model);
-  console.log('Selected Voice:', voiceName);
 
   try {
-    // Use the exact method call from your original code
-    const response = await ai.models.generateContentStream({
+    const response = await ai.models.generateContent({
       model,
-      config,
-      contents,
+      contents: [{ parts: [{ text }] }],
+      config: {
+        temperature: temperature,
+        responseModalities: ['AUDIO'],
+        speechConfig: {
+          voiceConfig: {
+            prebuiltVoiceConfig: {
+              voiceName: voiceName,
+            }
+          }
+        },
+      },
     });
 
-    console.log('Stream response received, processing chunks...');
-    const audioChunks: Buffer[] = [];
-    let chunkCount = 0;
-
-    for await (const chunk of response) {
-      chunkCount++;
-      console.log(`Processing chunk ${chunkCount}:`, JSON.stringify(chunk, null, 2).slice(0, 500));
-      
-      if (!chunk.candidates || !chunk.candidates[0].content || !chunk.candidates[0].content.parts) {
-        console.log(`Chunk ${chunkCount}: No candidates/content/parts, skipping`);
-        continue;
-      }
-      
-      if (chunk.candidates?.[0]?.content?.parts?.[0]?.inlineData) {
-        const inlineData = chunk.candidates[0].content.parts[0].inlineData;
-        console.log(`Chunk ${chunkCount}: Found inlineData:`, {
-          mimeType: inlineData.mimeType,
-          dataLength: inlineData.data?.length || 0
-        });
-        
-        let buffer = Buffer.from(inlineData.data || '', 'base64');
-        
-        // Convert to WAV if needed
-        let fileExtension = mime.getExtension(inlineData.mimeType || '');
-        if (!fileExtension) {
-          console.log(`Chunk ${chunkCount}: Converting to WAV...`);
-          fileExtension = 'wav';
-          buffer = convertToWav(inlineData.data || '', inlineData.mimeType || '');
-        }
-        
-        audioChunks.push(buffer);
-        console.log(`Chunk ${chunkCount}: Added buffer of length ${buffer.length}`);
-      } else {
-        console.log(`Chunk ${chunkCount}: No inlineData found`);
-        if (chunk.candidates?.[0]?.content?.parts?.[0]?.text) {
-          console.log(`Chunk ${chunkCount}: Found text instead:`, chunk.candidates[0].content.parts[0].text);
-        }
-      }
+    // Extract audio data from response
+    if (!response.candidates || !response.candidates[0]) {
+      throw new Error("No candidates in response");
     }
 
-    console.log(`Finished processing ${chunkCount} chunks, audioChunks.length: ${audioChunks.length}`);
-
-    if (audioChunks.length === 0) {
-      throw new Error("No audio data received from Gemini API");
+    const candidate = response.candidates[0];
+    if (!candidate.content || !candidate.content.parts || !candidate.content.parts[0]) {
+      throw new Error("No content parts in response");
     }
 
-    // Combine all audio chunks
-    const combinedBuffer = Buffer.concat(audioChunks);
-    console.log('Combined buffer length:', combinedBuffer.length);
-    return Uint8Array.from(combinedBuffer);
+    const part = candidate.content.parts[0];
+    if (!part.inlineData || !part.inlineData.data) {
+      throw new Error("No audio data in response");
+    }
+
+    // Convert base64 to buffer
+    const audioData = part.inlineData.data;
+    const mimeType = part.inlineData.mimeType || 'audio/wav';
+    
+    let buffer = Buffer.from(audioData, 'base64');
+    
+    // Convert to WAV if needed
+    let fileExtension = mime.getExtension(mimeType);
+    if (!fileExtension || fileExtension !== 'wav') {
+      buffer = convertToWav(audioData, mimeType);
+    }
+    
+    return Uint8Array.from(buffer);
 
   } catch (err: any) {
-    console.error("Gemini generateContentStream threw", err?.response ?? err);
-    console.error("Full error:", err);
+    // More specific error messages for common issues
+    if (err?.message?.includes('fetch failed')) {
+      throw new Error(`Network connectivity issue: Unable to reach Gemini API. Please check your internet connection, firewall settings, or try again later. Original error: ${err?.message}`);
+    }
+    
+    if (err?.message?.includes('API key')) {
+      throw new Error(`API authentication failed: Please verify your GEMINI_API_KEY is correct. Original error: ${err?.message}`);
+    }
+    
+    if (err?.message?.includes('quota') || err?.message?.includes('limit')) {
+      throw new Error(`API quota exceeded: You may have reached your usage limit. Original error: ${err?.message}`);
+    }
+    
     throw new Error(`Gemini request failed: ${err?.message || err}`);
   }
 }

@@ -31,6 +31,51 @@ export async function GET() {
         model.name?.includes('gemini-2.5-pro-preview-tts')
       );
 
+      // Test TTS voice availability
+      let ttsVoiceTest = null;
+      if (ttsModel) {
+        try {
+          // Try a simple TTS request to see available voices
+          const testConfig = {
+            temperature: 0,
+            responseModalities: ['audio'],
+            speechConfig: {
+              voiceConfig: {
+                prebuiltVoiceConfig: {
+                  voiceName: 'Orus', // Try the default voice
+                }
+              }
+            }
+          };
+
+          const testContents = [{
+            role: 'user',
+            parts: [{ text: 'Test' }]
+          }];
+
+          // Testing TTS with Orus voice
+          const testResponse = await ai.models.generateContentStream({
+            model: 'gemini-2.5-pro-preview-tts',
+            config: testConfig,
+            contents: testContents,
+          });
+
+          ttsVoiceTest = { success: true, voice: 'Orus' };
+          
+          // Try to consume the stream to check for errors
+          for await (const chunk of testResponse) {
+            break; // Just test the first chunk
+          }
+          
+        } catch (voiceError: any) {
+          ttsVoiceTest = { 
+            success: false, 
+            error: voiceError.message,
+            voice: 'Orus'
+          };
+        }
+      }
+
       return NextResponse.json({
         success: true,
         message: 'Connection successful!',
@@ -38,7 +83,8 @@ export async function GET() {
         apiKeyLength: process.env.GEMINI_API_KEY?.length || 0,
         modelsAvailable: models.length,
         ttsModelAvailable: !!ttsModel,
-        ttsModelName: ttsModel?.name || 'Not found'
+        ttsModelName: ttsModel?.name || 'Not found',
+        ttsVoiceTest: ttsVoiceTest
       });
 
     } catch (apiError: any) {

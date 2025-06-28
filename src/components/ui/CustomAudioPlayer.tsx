@@ -21,7 +21,7 @@ export default function CustomAudioPlayer({ src, className = '', user }: CustomA
 
   // Check if the current user has download permission
   const canDownload = user?.email === 'demo1@mw.com'; // Only demo1 user can download
-  
+
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
