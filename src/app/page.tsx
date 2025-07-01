@@ -1,70 +1,21 @@
 'use client'
 
-import { useState, useEffect } from 'react';
 import { SparklesCore } from "@/components/ui/sparkles";
 import GradientText from "@/components/ui/GradientText";
 import TextToSpeechInput from "@/components/TextToSpeechInput";
-import LoginModal from "@/components/LoginModal";
-// import ConnectionTest from "@/components/ConnectionTest"; // Kept for future debugging
+import { useState, useEffect } from "react";
 
 export default function Home() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [particleDensity, setParticleDensity] = useState(7200);
 
   useEffect(() => {
-    // Check for stored authentication
-    const storedToken = localStorage.getItem('mw_token');
-    const storedUser = localStorage.getItem('mw_user');
-    
-    if (storedToken && storedUser) {
-      try {
-        const userData = JSON.parse(storedUser);
-        setToken(storedToken);
-        setUser(userData);
-        setIsAuthenticated(true);
-      } catch (error) {
-        // Invalid stored data, clear it
-        localStorage.removeItem('mw_token');
-        localStorage.removeItem('mw_user');
-      }
+    setMounted(true);
+    // Set particle density based on screen size, only on client side
+    if (typeof window !== 'undefined') {
+      setParticleDensity(window.innerWidth < 768 ? 4000 : 7200);
     }
-    setLoading(false);
   }, []);
-
-  const handleLogin = (newToken: string, userData: any) => {
-    setToken(newToken);
-    setUser(userData);
-    setIsAuthenticated(true);
-    setShowLoginModal(false);
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('mw_token');
-    localStorage.removeItem('mw_user');
-    setToken(null);
-    setUser(null);
-    setIsAuthenticated(false);
-  };
-
-  const handleLoginClick = () => {
-    setShowLoginModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setShowLoginModal(false);
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-gray-600">Loading...</div>
-      </div>
-    );
-  }
-
   return (
     <div>
       <div className="h-[20rem] w-full bg-white flex flex-col items-center justify-center relative pt-16 md:pt-32">
@@ -83,43 +34,24 @@ export default function Home() {
           <div className="absolute inset-x-30 md:inset-x-60 top-0 bg-gradient-to-r from-transparent via-purple-500 to-transparent h-px w-1/4" />
 
           {/* Core component */}
-          <SparklesCore
-            background="transparent"
-            minSize={0.4}
-            maxSize={1.2}
-            particleDensity={window.innerWidth < 768 ? 4000 : 7200}
-            className="w-full h-full"
-            particleColor="#9033ff"
-          />
+          {mounted && (
+            <SparklesCore
+              background="transparent"
+              minSize={0.4}
+              maxSize={1.2}
+              particleDensity={particleDensity}
+              className="w-full h-full"
+              particleColor="#9033ff"
+            />
+          )}
 
           {/* Radial Gradient to prevent sharp edges */}
           <div className="absolute inset-0 w-full h-full bg-white [mask-image:radial-gradient(350px_200px_at_top,transparent_20%,white)]"></div>
         </div>
       </div>
       
-      {/* Connection Test - Removed but kept component for future debugging
-      <div className="py-8">
-        <ConnectionTest />
-      </div>
-      */}
-      
-      {/* Input Section - Always shown, handles auth state internally */}
-      <TextToSpeechInput 
-        user={user} 
-        token={token || undefined} 
-        onLogout={handleLogout}
-        onLoginClick={handleLoginClick}
-        isAuthenticated={isAuthenticated}
-          />
-      
-      {/* Login Modal */}
-      <LoginModal
-        isOpen={showLoginModal}
-        onLogin={handleLogin}
-        onClose={handleCloseModal}
-      />
-      
-      {/* MoonWhale Voice-Over content will go here */}
+      {/* TTS Input Section */}
+      <TextToSpeechInput />
     </div>
   );
 }

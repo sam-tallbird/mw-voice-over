@@ -1,16 +1,17 @@
 import { createClient } from '@supabase/supabase-js';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-// Create a Supabase client for use on the client side
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// For client-side operations
+export const createClientSupabase = () => createClientComponentClient();
 
-// This helper should only be used in server-side contexts
-export const createServerSupabaseClient = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
-  
-  // The service role key can bypass RLS policies
-  return createClient(supabaseUrl, supabaseServiceKey);
-}; 
+// Service role client (for admin operations - server only)
+export const createServiceSupabase = () => createClient(
+  supabaseUrl,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
+
+// Legacy function (keeping for compatibility)
+export const createServerSupabaseClient = createServiceSupabase; 

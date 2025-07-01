@@ -5,10 +5,10 @@ import { useState, useRef, useEffect } from 'react';
 interface CustomAudioPlayerProps {
   src: string;
   className?: string;
-  user?: any; // User object to check for download permissions
+  userEmail?: string;
 }
 
-export default function CustomAudioPlayer({ src, className = '', user }: CustomAudioPlayerProps) {
+export default function CustomAudioPlayer({ src, className = '', userEmail }: CustomAudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -16,11 +16,14 @@ export default function CustomAudioPlayer({ src, className = '', user }: CustomA
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   const playbackRates = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
-  // Check if the current user has download permission
-  const canDownload = user?.email === 'demo1@mw.com'; // Only demo1 user can download
+  // Ensure component only renders on client side
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -64,6 +67,8 @@ export default function CustomAudioPlayer({ src, className = '', user }: CustomA
 
   // Handle clicking directly on the progress bar
   const handleProgressBarClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (typeof window === 'undefined') return;
+    
     const audio = audioRef.current;
     const progressBar = progressRef.current;
     if (!audio || !progressBar) return;
@@ -77,8 +82,6 @@ export default function CustomAudioPlayer({ src, className = '', user }: CustomA
     audio.currentTime = newTime;
     setCurrentTime(newTime);
   };
-
-  // Volume control removed
 
   const changePlaybackRate = (rate: number) => {
     const audio = audioRef.current;
@@ -106,7 +109,8 @@ export default function CustomAudioPlayer({ src, className = '', user }: CustomA
   };
 
   const handleDownload = () => {
-    if (!canDownload) return;
+    // Only run on client side
+    if (typeof window === 'undefined') return;
     
     const link = document.createElement('a');
     link.href = src;
@@ -115,6 +119,11 @@ export default function CustomAudioPlayer({ src, className = '', user }: CustomA
     link.click();
     document.body.removeChild(link);
   };
+
+  // Prevent SSR issues
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div className={`bg-gray-50 p-3 sm:p-4 rounded-lg w-full ${className}`}>
@@ -205,14 +214,14 @@ export default function CustomAudioPlayer({ src, className = '', user }: CustomA
           )}
         </div>
         
-        {/* Download Button - Only visible for authorized user */}
-        {canDownload && (
+        {/* Download button - only for demo1 user */}
+        {userEmail === 'demo1@mw.com' && (
           <button 
             onClick={handleDownload}
-            className="flex-shrink-0 w-8 h-8 flex items-center justify-center text-xs px-2 py-1 bg-green-100 border border-green-300 rounded hover:bg-green-200 transition-colors"
-            title="Download Audio"
+            className="text-xs px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50 flex items-center"
+            title="Download audio (Premium Feature)"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#059669" viewBox="0 0 16 16">
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" viewBox="0 0 16 16">
               <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5z"/>
               <path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708l3 3z"/>
             </svg>

@@ -1,115 +1,119 @@
 import { NextResponse } from 'next/server';
-import { GoogleGenAI } from '@google/genai';
+import { createClient } from '@supabase/supabase-js';
 
 export const runtime = 'nodejs';
 
 export async function GET() {
+  const results: any = {
+    timestamp: new Date().toISOString(),
+    gemini: { success: false, details: {} },
+    supabase: { success: false, details: {} }
+  };
+
+  // Test Gemini API
   try {
-    // Check if API key exists
-    if (!process.env.GEMINI_API_KEY) {
-      return NextResponse.json({ 
-        success: false, 
-        error: 'GEMINI_API_KEY environment variable is missing' 
-      }, { status: 400 });
-    }
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${process.env.GEMINI_API_KEY}`,
+      { method: 'GET' }
+    );
 
-    // Initialize the client
-    const ai = new GoogleGenAI({
-      apiKey: process.env.GEMINI_API_KEY,
-    });
-
-    // Try to list models to test connection
-    try {
-      const modelsPager = await ai.models.list();
-      const models = [];
-      for await (const model of modelsPager) {
-        models.push(model);
-      }
+    if (response.ok) {
+      const data = await response.json();
+      const models = data.models || [];
+      const ttsModel = models.find((m: any) => m.name?.includes('text-to-speech'));
       
-      // Look for the TTS model specifically
-      const ttsModel = models.find((model: any) => 
-        model.name?.includes('gemini-2.5-pro-preview-tts')
-      );
-
-      // Test TTS voice availability
-      let ttsVoiceTest = null;
-      if (ttsModel) {
-        try {
-          // Try a simple TTS request to see available voices
-          const testConfig = {
-            temperature: 0,
-            responseModalities: ['audio'],
-            speechConfig: {
-              voiceConfig: {
-                prebuiltVoiceConfig: {
-                  voiceName: 'Orus', // Try the default voice
-                }
-              }
-            }
-          };
-
-          const testContents = [{
-            role: 'user',
-            parts: [{ text: 'Test' }]
-          }];
-
-          // Testing TTS with Orus voice
-          const testResponse = await ai.models.generateContentStream({
-            model: 'gemini-2.5-pro-preview-tts',
-            config: testConfig,
-            contents: testContents,
-          });
-
-          ttsVoiceTest = { success: true, voice: 'Orus' };
-          
-          // Try to consume the stream to check for errors
-          for await (const chunk of testResponse) {
-            break; // Just test the first chunk
-          }
-          
-        } catch (voiceError: any) {
-          ttsVoiceTest = { 
-            success: false, 
-            error: voiceError.message,
-            voice: 'Orus'
-          };
-        }
-      }
-
-      return NextResponse.json({
+      results.gemini = {
         success: true,
-        message: 'Connection successful!',
-        apiKeyPresent: !!process.env.GEMINI_API_KEY,
-        apiKeyLength: process.env.GEMINI_API_KEY?.length || 0,
-        modelsAvailable: models.length,
-        ttsModelAvailable: !!ttsModel,
-        ttsModelName: ttsModel?.name || 'Not found',
-        ttsVoiceTest: ttsVoiceTest
-      });
-
-    } catch (apiError: any) {
-      // If listing models fails, it might be an API key issue
-      if (apiError.message?.includes('API key') || apiError.message?.includes('authentication')) {
-        return NextResponse.json({
-          success: false,
-          error: 'Invalid API key or authentication failed',
-          details: apiError.message
-        }, { status: 401 });
-      }
-
-      return NextResponse.json({
+        details: {
+          api_key_length: process.env.GEMINI_API_KEY?.length || 0,
+          total_models: models.length,
+          tts_model_available: !!ttsModel,
+          tts_model_name: ttsModel?.name || 'Not found'
+        }
+      };
+    } else {
+      results.gemini = {
         success: false,
-        error: 'API connection failed',
-        details: apiError.message
-      }, { status: 500 });
+        details: { error: `HTTP ${response.status}: ${response.statusText}` }
+      };
+    }
+  } catch (error: any) {
+    results.gemini = {
+      success: false,
+      details: { error: error.message }
+    };
+  }
+
+  // Test Supabase Connection
+  try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    // Simple connection test - try to query a non-existent table
+    // This will fail but confirm the connection works
+    const { data, error } = await supabase
+      .from('connection_test_table')
+      .select('*')
+      .limit(1);
+
+    // If we get a "relation does not exist" error, that means connection is working
+    if (error && error.message.includes('relation') && error.message.includes('does not exist')) {
+      results.supabase = {
+        success: true,
+        details: {
+          message: 'Connection successful',
+          url_configured: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+          service_key_configured: !!process.env.SUPABASE_SERVICE_ROLE_KEY,
+          ready_for_schema: true
+        }
+      };
+    } else if (!error) {
+      // Unexpected success (table exists)
+      results.supabase = {
+        success: true,
+        details: {
+          message: 'Connection successful (table exists)',
+          url_configured: true,
+          service_key_configured: true,
+          ready_for_schema: true
+        }
+      };
+    } else {
+      // Real connection error
+      results.supabase = {
+        success: false,
+        details: { 
+          error: error.message,
+          url_configured: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+          service_key_configured: !!process.env.SUPABASE_SERVICE_ROLE_KEY
+        }
+      };
     }
 
-  } catch (err: any) {
-    console.error('Connection test error:', err);
-    return NextResponse.json({
+  } catch (error: any) {
+    results.supabase = {
       success: false,
-      error: 'Unexpected error during connection test',
-      details: err.message
-    }, { status: 500 });
+      details: { error: error.message }
+    };
   }
+
+  // Overall status
+  const allSuccess = results.gemini.success && results.supabase.success;
+  
+  return NextResponse.json({
+    ...results,
+    overall: {
+      success: allSuccess,
+      message: allSuccess ? 
+        'All services connected successfully!' : 
+        'Some services have connection issues',
+      next_steps: allSuccess ? 
+        'Ready to implement Supabase schema and full features' :
+        'Please check failed services'
+    }
+  }, { 
+    status: allSuccess ? 200 : 500 
+  });
 } 

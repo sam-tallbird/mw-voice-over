@@ -1,105 +1,142 @@
 'use client'
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
-import { Auth } from '@supabase/auth-ui-react';
-import { ThemeSupa } from '@supabase/auth-ui-shared';
+import { useState } from 'react'
+import { createClientSupabase } from '@/lib/supabase'
+import { useRouter } from 'next/navigation'
 
-export default function LoginForm() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [redirectUrl, setRedirectUrl] = useState<string>('');
-  const router = useRouter();
+interface LoginFormProps {
+  redirectTo?: string
+}
 
-  // Set the redirect URL after component mounts (client-side only)
-  useEffect(() => {
-    setRedirectUrl(`${window.location.origin}/dashboard`);
-  }, []);
+export default function LoginForm({ redirectTo = '/' }: LoginFormProps) {
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [message, setMessage] = useState<string | null>(null)
+  
+  const router = useRouter()
+  const supabase = createClientSupabase()
 
-  // For email/password login
-  const handleEmailLogin = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+    setMessage(null)
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password: password,
+      })
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) {
+          setError('Invalid email or password. Please check your credentials.')
+        } else if (error.message.includes('Email not confirmed')) {
+          setError('Please check your email and confirm your account first.')
+        } else {
+          setError(error.message)
+        }
+        return
+      }
 
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-    } else {
-      router.push('/dashboard');
-      router.refresh();
+      if (data.user) {
+        setMessage('Login successful! Redirecting...')
+        
+        // Small delay to show success message
+        setTimeout(() => {
+          router.push(redirectTo)
+          router.refresh()
+        }, 1000)
+      }
+
+    } catch (err: any) {
+      setError('An unexpected error occurred. Please try again.')
+      console.error('Login error:', err)
+    } finally {
+      setLoading(false)
     }
-  };
+  }
 
   return (
-    <div className="w-full max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-      {/* Option 1: Custom Form */}
-      <form onSubmit={handleEmailLogin} className="space-y-4 mb-8">
-        <h2 className="text-2xl font-bold text-center">Login to MoonWhale</h2>
-        
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-            {error}
-          </div>
-        )}
-        
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-            Email
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-          />
+    <div className="w-full max-w-md mx-auto">
+      <div className="bg-white p-8 rounded-lg shadow-lg border">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">Welcome Back</h2>
+          <p className="text-gray-600 mt-2">Sign in to your MoonWhale account</p>
         </div>
-        
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-            Password
-          </label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            required
-            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-purple-500 focus:ring-purple-500"
-          />
-        </div>
-        
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
-        >
-          {loading ? 'Logging in...' : 'Login'}
-        </button>
-      </form>
 
-      {/* Option 2: Supabase Auth UI */}
-      <div className="mt-8 pt-8 border-t border-gray-200">
-        <h3 className="text-lg font-medium text-center mb-4">Or use Supabase Auth UI</h3>
-        {redirectUrl && (
-          <Auth
-            supabaseClient={supabase}
-            appearance={{ theme: ThemeSupa }}
-            providers={[]}
-            redirectTo={redirectUrl}
-          />
-        )}
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              Email Address
+            </label>
+            <input
+              id="email"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              placeholder="your@email.com"
+              disabled={loading}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              placeholder="Enter your password"
+              disabled={loading}
+            />
+          </div>
+
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-sm text-red-700">❌ {error}</p>
+            </div>
+          )}
+
+          {message && (
+            <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+              <p className="text-sm text-green-700">✅ {message}</p>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading || !email.trim() || !password}
+            className="w-full bg-purple-600 text-white py-2 px-4 rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {loading ? (
+              <span className="flex items-center justify-center">
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Signing in...
+              </span>
+            ) : (
+              'Sign In'
+            )}
+          </button>
+        </form>
+
+        <div className="mt-6 pt-6 border-t border-gray-200">
+          <p className="text-center text-sm text-gray-600">
+            Don't have an account? Contact admin for access.
+          </p>
+        </div>
       </div>
     </div>
-  );
+  )
 } 

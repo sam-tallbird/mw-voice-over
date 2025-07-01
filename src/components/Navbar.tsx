@@ -2,14 +2,21 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
+import { useAuth } from './AuthProvider';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, loading, signOut } = useAuth();
 
   const navItems = [
     { href: '/', label: 'home' },
     { href: '/pricing', label: 'pricing' },
   ];
+
+  const handleSignOut = async () => {
+    await signOut();
+    setIsMenuOpen(false);
+  };
 
   return (
     <nav className="bg-white border-b border-gray-200">
@@ -18,9 +25,9 @@ export default function Navbar() {
         <div className="flex-shrink-0">
           <Link href="/" className="flex items-center">
             <img
-              src="/mw-voice.svg"
-              alt="MoonWhale Voice-Over"
-              className="h-4 w-auto"
+              src="/klam.svg"
+              alt="Klam"
+              className="h-5 w-auto"
             />
           </Link>
         </div>
@@ -42,6 +49,37 @@ export default function Navbar() {
                 </span>
               </Link>
             ))}
+            
+            {/* Auth Section */}
+            {loading ? (
+              <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+            ) : user ? (
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-medium">
+                      {user.email?.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <span className="text-sm text-gray-700 hidden lg:block">
+                    {user.email}
+                  </span>
+                </div>
+                <button
+                  onClick={handleSignOut}
+                  className="text-sm text-gray-600 hover:text-gray-800 px-3 py-1 rounded-md hover:bg-gray-100 transition-colors"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors text-sm font-medium"
+              >
+                Sign In
+              </Link>
+            )}
           </div>
         </div>
 
@@ -104,6 +142,42 @@ export default function Navbar() {
               </span>
             </Link>
           ))}
+          
+          {/* Mobile Auth Section */}
+          <div className="border-t border-gray-200 pt-3 mt-3">
+            {loading ? (
+              <div className="px-4 py-2">
+                <div className="w-full h-8 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            ) : user ? (
+              <div className="space-y-2">
+                <div className="px-4 py-2 flex items-center space-x-2">
+                  <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm font-medium">
+                      {user.email?.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <span className="text-sm text-gray-700">
+                    {user.email}
+                  </span>
+                </div>
+                <button
+                  onClick={handleSignOut}
+                  className="w-full text-left px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 transition-colors"
+                >
+                  Sign Out
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="block px-4 py-2 bg-purple-600 text-white text-center rounded-md hover:bg-purple-700 transition-colors mx-4"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                Sign In
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </nav>
