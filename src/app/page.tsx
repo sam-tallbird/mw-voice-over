@@ -20,7 +20,7 @@ export default function Home() {
     <div>
       <div className="h-[20rem] w-full bg-white flex flex-col items-center justify-center relative pt-16 md:pt-32">
         <GradientText
-          colors={["#660AF0", "#1DB6FD", "#45FC79"]}
+          colors={["#1073FF", "#1DB6FD", "#45FC79"]}
           animationSpeed={8}
           showBorder={false}
           className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-center whitespace-normal md:whitespace-nowrap relative z-20 px-4 md:px-0"
@@ -31,7 +31,7 @@ export default function Home() {
           {/* Gradients */}
           <div className="absolute inset-x-10 md:inset-x-20 top-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent h-[2px] w-3/4 blur-sm" />
           <div className="absolute inset-x-10 md:inset-x-20 top-0 bg-gradient-to-r from-transparent via-blue-500 to-transparent h-px w-3/4" />
-          <div className="absolute inset-x-30 md:inset-x-60 top-0 bg-gradient-to-r from-transparent via-purple-500 to-transparent h-px w-1/4" />
+          <div className="absolute inset-x-30 md:inset-x-60 top-0 bg-gradient-to-r from-transparent to-transparent h-px w-1/4" style={{ background: 'linear-gradient(to right, transparent, #1073FF, transparent)' }} />
 
           {/* Core component */}
           {mounted && (

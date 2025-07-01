@@ -134,7 +134,10 @@ export default function ConnectionTest() {
       <button
         onClick={testConnection}
         disabled={testing}
-        className="px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-6"
+        className="px-6 py-3 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-6"
+        style={{ backgroundColor: '#1073FF' }}
+        onMouseEnter={(e) => !testing && (e.currentTarget.style.backgroundColor = '#0952CC')}
+        onMouseLeave={(e) => !testing && (e.currentTarget.style.backgroundColor = '#1073FF')}
       >
         {testing ? '🔄 Testing Connections...' : '🚀 Test All Connections'}
       </button>

@@ -114,7 +114,8 @@ export default function AdminPage() {
             type="password"
             value={adminPassword}
             onChange={(e) => setAdminPassword(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-transparent"
+            style={{ '--tw-ring-color': '#1073FF' } as React.CSSProperties}
             required
           />
         </div>
@@ -136,7 +137,10 @@ export default function AdminPage() {
             <button
               onClick={resetAllUsers}
               disabled={loading || !adminPassword}
-              className="w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 disabled:opacity-50"
+              className="w-full px-4 py-2 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 transition-colors"
+            style={{ backgroundColor: '#1073FF', '--tw-ring-color': '#1073FF' } as React.CSSProperties}
+            onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#0952CC')}
+            onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = '#1073FF')}
             >
               {loading ? 'Resetting...' : 'Reset All Users'}
             </button>
@@ -161,7 +165,8 @@ export default function AdminPage() {
               type="text"
               value={userId}
               onChange={(e) => setUserId(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 mb-2"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:border-transparent mb-2"
+            style={{ '--tw-ring-color': '#1073FF' } as React.CSSProperties}
               placeholder="User UUID"
             />
             <button

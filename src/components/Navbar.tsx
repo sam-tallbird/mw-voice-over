@@ -56,7 +56,7 @@ export default function Navbar() {
             ) : user ? (
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#1073FF' }}>
                     <span className="text-white text-sm font-medium">
                       {user.email?.charAt(0).toUpperCase()}
                     </span>
@@ -75,7 +75,10 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/login"
-                className="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors text-sm font-medium"
+                className="text-white px-4 py-2 rounded-md transition-colors text-sm font-medium"
+                style={{ backgroundColor: '#1073FF' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0952CC'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1073FF'}
               >
                 Sign In
               </Link>
@@ -152,7 +155,7 @@ export default function Navbar() {
             ) : user ? (
               <div className="space-y-2">
                 <div className="px-4 py-2 flex items-center space-x-2">
-                  <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: '#1073FF' }}>
                     <span className="text-white text-sm font-medium">
                       {user.email?.charAt(0).toUpperCase()}
                     </span>
@@ -171,7 +174,10 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/login"
-                className="block px-4 py-2 bg-purple-600 text-white text-center rounded-md hover:bg-purple-700 transition-colors mx-4"
+                className="block px-4 py-2 text-white text-center rounded-md transition-colors mx-4"
+                style={{ backgroundColor: '#1073FF' }}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0952CC'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1073FF'}
                 onClick={() => setIsMenuOpen(false)}
               >
                 Sign In

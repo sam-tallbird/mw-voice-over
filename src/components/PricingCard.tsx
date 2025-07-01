@@ -1,3 +1,5 @@
+'use client';
+
 interface PricingCardProps {
   title: string;
   emoji: string;
@@ -22,16 +24,16 @@ export default function PricingCard({
   isPopular = false,
   borderColor = 'gray'
 }: PricingCardProps) {
-  const borderClass = borderColor === 'purple' ? 'border-purple-300' : 'border-gray-200';
+  const borderClass = borderColor === 'purple' ? 'border-blue-300' : 'border-gray-200';
 
   // Add animated border for Pro plan
   if (title === 'Pro') {
     return (
-      <div className="relative p-[2px] rounded-xl sm:rounded-2xl bg-gradient-to-r from-cyan-500 via-purple-500 to-cyan-500 bg-[length:200%_200%] animate-gradient">
+      <div className="relative p-[2px] rounded-xl sm:rounded-2xl bg-gradient-to-r from-cyan-500 to-cyan-500 bg-[length:200%_200%] animate-gradient" style={{ background: 'linear-gradient(to right, #06B6D4, #1073FF, #06B6D4)' }}>
         {/* Most Popular Badge - positioned relative to border container */}
         {isPopular && (
           <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-50">
-            <span className="bg-gradient-to-r from-cyan-500 to-purple-600 text-white px-4 sm:px-6 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-semibold shadow-lg">Most Popular</span>
+            <span className="text-white px-4 sm:px-6 py-1 sm:py-2 rounded-full text-xs sm:text-sm font-semibold shadow-lg" style={{ background: 'linear-gradient(to right, #06B6D4, #1073FF)' }}>Most Popular</span>
           </div>
         )}
         
@@ -59,7 +61,12 @@ export default function PricingCard({
               {price}
               {priceSubtext && <span className="text-base sm:text-lg font-normal text-gray-600">{priceSubtext}</span>}
             </div>
-            <button className="w-full bg-purple-600 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-purple-700 transition-colors font-semibold text-sm sm:text-base">
+            <button 
+              className="w-full text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors font-semibold text-sm sm:text-base" 
+              style={{ backgroundColor: '#1073FF' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0952CC'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1073FF'}
+            >
               Contact Sales
             </button>
           </div>
@@ -73,7 +80,7 @@ export default function PricingCard({
     <div className={`bg-white border-2 ${borderClass} rounded-xl sm:rounded-2xl p-4 sm:p-8 shadow-lg hover:shadow-xl transition-shadow flex flex-col h-full relative`}>
       {isPopular && (
         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-          <span className="bg-purple-600 text-white px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm font-semibold">Most Popular</span>
+          <span className="text-white px-3 sm:px-4 py-1 rounded-full text-xs sm:text-sm font-semibold" style={{ backgroundColor: '#1073FF' }}>Most Popular</span>
         </div>
       )}
       
@@ -96,7 +103,12 @@ export default function PricingCard({
           {price}
           {priceSubtext && <span className="text-base sm:text-lg font-normal text-gray-600">{priceSubtext}</span>}
         </div>
-        <button className="w-full bg-purple-600 text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:bg-purple-700 transition-colors font-semibold text-sm sm:text-base">
+        <button 
+          className="w-full text-white py-2 sm:py-3 px-4 sm:px-6 rounded-lg transition-colors font-semibold text-sm sm:text-base"
+          style={{ backgroundColor: '#1073FF' }}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0952CC'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1073FF'}
+        >
           Contact Sales
         </button>
       </div>

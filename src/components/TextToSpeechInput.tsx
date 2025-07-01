@@ -123,7 +123,7 @@ export default function TextToSpeechInput() {
              `${remaining} remaining`}
           </span>
           {userUsage.custom_limit && (
-            <span className="text-purple-600 font-medium">
+            <span className="font-medium" style={{ color: '#1073FF' }}>
               Custom Limit ⭐
             </span>
           )}
@@ -153,8 +153,8 @@ export default function TextToSpeechInput() {
       <div className="w-full bg-white py-8 md:py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="text-center bg-gray-50 border border-gray-200 rounded-lg p-8">
-            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#E6F0FF' }}>
+              <svg className="w-8 h-8" style={{ color: '#1073FF' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
@@ -164,7 +164,10 @@ export default function TextToSpeechInput() {
             </p>
             <Link 
               href="/login"
-              className="inline-flex items-center px-6 py-3 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 transition-colors"
+              className="inline-flex items-center px-6 py-3 text-white font-medium rounded-lg transition-colors"
+        style={{ backgroundColor: '#1073FF' }}
+        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#0952CC'}
+        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1073FF'}
             >
               <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
@@ -310,7 +313,7 @@ export default function TextToSpeechInput() {
           <div className="mb-6">
             <label htmlFor="temperature-control" className="block text-sm font-medium text-gray-700 mb-2">
               Temperature Control (Advanced) 
-              <span className="ml-2 text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">Premium Feature</span>
+              <span className="ml-2 text-xs px-2 py-1 rounded-full" style={{ backgroundColor: '#E6F0FF', color: '#0952CC' }}>Premium Feature</span>
             </label>
             <div className="relative">
               {/* Custom progress bar like audio player */}
@@ -320,7 +323,7 @@ export default function TextToSpeechInput() {
                   className="absolute top-0 left-0 h-full rounded-full"
                   style={{ 
                     width: `${(temperature / 2) * 100}%`,
-                    backgroundColor: canGenerate ? '#660AF0' : '#9CA3AF' // Purple or gray
+                    backgroundColor: canGenerate ? '#1073FF' : '#9CA3AF' // Blue or gray
                   }}
                 ></div>
                 
@@ -399,7 +402,7 @@ export default function TextToSpeechInput() {
                 : 'border-gray-300'
             }`}
             style={{
-              backgroundColor: (!canGenerate || generating || !inputText.trim()) ? '#9CA3AF' : "#660AF0",
+              backgroundColor: (!canGenerate || generating || !inputText.trim()) ? '#9CA3AF' : "#1073FF",
             }}
             onMouseEnter={(e) => {
               if (canGenerate && !generating && inputText.trim()) {
@@ -408,7 +411,7 @@ export default function TextToSpeechInput() {
             }}
             onMouseLeave={(e) => {
               if (canGenerate && !generating && inputText.trim()) {
-                e.currentTarget.style.backgroundColor = "#660AF0";
+                e.currentTarget.style.backgroundColor = "#1073FF";
               }
             }}
             onClick={handleGenerate}
