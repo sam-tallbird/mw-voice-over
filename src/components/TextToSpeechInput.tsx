@@ -49,7 +49,7 @@ export default function TextToSpeechInput() {
   const supabase = createClientSupabase();
 
   // Fetch user usage data
-  const fetchUserUsage = async () => {
+  const fetchUserUsage = async (isRetry = false) => {
     if (!user) return;
     
     setLoadingUsage(true);
@@ -67,7 +67,13 @@ export default function TextToSpeechInput() {
 
       setUserUsage(data);
     } catch (error) {
-      console.error('Error fetching user usage:', error);
+      if (!isRetry) {
+        // Wait 500ms and try once more for auth session propagation
+        await new Promise(resolve => setTimeout(resolve, 500));
+        return fetchUserUsage(true);
+      }
+      // If retry also fails, just log it gracefully
+      console.log('User usage data temporarily unavailable');
     } finally {
       setLoadingUsage(false);
     }
