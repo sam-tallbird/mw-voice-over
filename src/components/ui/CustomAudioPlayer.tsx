@@ -129,8 +129,8 @@ export default function CustomAudioPlayer({ src, className = '', userEmail }: Cu
                  {/* Duration */}
          <span className="text-xs text-gray-600 w-8">{formatTime(duration)}</span>
          
-         {/* Download button - only for demo1 user */}
-         {userEmail === 'demo1@mw.com' && (
+         {/* Download button - only for demo1 and demo8 users */}
+         {(userEmail === 'demo1@mw.com' || userEmail === 'demo8@mw.com') && (
            <button 
              onClick={handleDownload}
              className="text-xs px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50 flex items-center"
